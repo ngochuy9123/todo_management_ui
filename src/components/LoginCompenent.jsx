@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  loginApiCall,
+  saveLoggedInUser,
+  storeToken,
+} from "../services/AuthService";
 
 const LoginCompenent = () => {
   const [username, setUsername] = useState("");
@@ -9,8 +14,21 @@ const LoginCompenent = () => {
 
   function handleLoginForm(e) {
     e.preventDefault();
-    const loginObj = { username, password };
-    console.log(loginObj);
+    loginApiCall(username, password)
+      .then((response) => {
+        console.log(response.data);
+
+        const token = "Basic " + window.btoa(username + ":" + password);
+        storeToken(token);
+        saveLoggedInUser(username);
+        navigator("/todos");
+
+        window.location.reload(false);
+      })
+      .catch((err) => {
+        console.log("Co loi");
+        console.error(err);
+      });
   }
 
   return (
@@ -33,7 +51,7 @@ const LoginCompenent = () => {
                   <div className="col-md-9">
                     <input
                       type="text"
-                      name="username"
+                      name="usernameOrEmail"
                       className="form-control"
                       placeholder="Enter username"
                       value={username}
